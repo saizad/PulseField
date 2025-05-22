@@ -1,31 +1,78 @@
 plugins {
     kotlin("jvm")
     id("maven-publish")
+    id("jacoco")
+    id("org.sonarqube") version "4.3.1.3277"
 }
 
-// Set group and version - important for JitPack
-group = "com.github.saizad" // This should match your GitHub username
-version = project.findProperty("version") ?: "1.0.0" // Gets version from project properties or uses default
+group = "com.github.saizad"
+version = project.findProperty("version") ?: "1.0.0"
 
-// Add this kotlin block to set the JVM target compatibility
 kotlin {
-    jvmToolchain(17) // Match this to your Java version
+    jvmToolchain(17)
 }
 
-// Your existing Java configuration
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 
-    // Add toolchain configuration for consistency
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
 
-    // This ensures that the source files are included in the published artifact
     withSourcesJar()
     withJavadocJar()
 }
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+val mainClassFiles = fileTree("$buildDir/classes/kotlin/main") {
+    exclude(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*"
+    )
+}
+
+
+tasks.register<JacocoReport>("jacocoTestReport1") {
+    dependsOn("test")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(files(mainClassFiles))
+    sourceDirectories.setFrom(files("src/main/kotlin", "src/main/java"))
+    executionData.setFrom(fileTree(buildDir) {
+        include("jacoco/test.exec")
+    })
+
+    doFirst {
+        println("Classes found for coverage: ${mainClassFiles.files}")
+    }
+}
+
+
+
+tasks.named("sonar") {
+    dependsOn("jacocoTestReport1")
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "Pulse-Field")
+        property("sonar.projectName", "Pulse Field")
+        property("sonar.host.url", "http://localhost:9000")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/jacocoTestReport1/jacocoTestReport1.xml")
+    }
+}
+
 
 dependencies {
     testImplementation(libs.junit)
@@ -38,21 +85,17 @@ dependencies {
     // **Coroutine & Reactive Testing**
     testImplementation(libs.kotlinx.coroutines.test)
 
-    // **Robolectric for Unit Testing**
-    testImplementation(libs.robolectric)
 }
 
-// Configure publishing
 publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = project.group.toString()
-            artifactId = "pulsefield" // This should match your module name
+            artifactId = "pulsefield"
             version = project.version.toString()
 
             from(components["java"])
 
-            // Add important Maven pom information
             pom {
                 name.set("PulseField")
                 description.set("Form field validation library")
@@ -76,7 +119,6 @@ publishing {
         }
     }
 
-    // Optional: configure repositories if you need to publish elsewhere besides local Maven
     repositories {
         maven {
             name = "local"
@@ -85,9 +127,7 @@ publishing {
     }
 }
 
-// For JitPack, we need to ensure tests don't block the build
 tasks.withType<Test> {
-    // Make tests always pass for JitPack builds (if env variable is set)
     if (System.getenv("JITPACK") == "true") {
         enabled = false
     }
