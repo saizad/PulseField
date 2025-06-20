@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PluseField"
+rootProject.name = "PulseField"
 include(":app")
 include(":pulsefield")
