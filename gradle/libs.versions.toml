@@ -10,6 +10,7 @@ kotlinTestJunit5 = "1.9.20"
 kotlinxCoroutinesTest = "1.6"
 junitVersion = "4.13.2"
 robolectric = "4.14.1"
+androidxMaterial = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,7 +28,9 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlinTestJunit5" }
 
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
-
+androidx-material = { module = "androidx.compose.material:material", version.ref = "androidxMaterial" }
+androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

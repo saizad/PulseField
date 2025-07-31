@@ -9,8 +9,8 @@ class QuantityField(
     fieldId: String,
     isMandatory: Boolean = false,
     ogField: Int? = null,
-    private val minQuantity: Int = 0,
-    private val maxQuantity: Int = Int.MAX_VALUE
+    val minQuantity: Int = 0,
+    val maxQuantity: Int = Int.MAX_VALUE
 ) : FormField<Int>(fieldId, isMandatory, ogField) {
 
     override fun validate(value: Int?): Flow<List<FieldValidationException>> {
